@@ -1,0 +1,75 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function signedIn() { return request.auth != null; }
+    // Admin = signed in with email/password (account created in Firebase Authentication)
+    // AND listed in /admins/{email} or /admins/{uid}. Both are managed only in the Firebase console.
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.firebase.sign_in_provider == 'password'
+        && (exists(/databases/$(db)/documents/admins/$(request.auth.token.email))
+            || exists(/databases/$(db)/documents/admins/$(request.auth.uid)));
+    }
+
+    match /admins/{id} {
+      allow get: if signedIn() && (request.auth.token.email == id || request.auth.uid == id);
+    }
+
+    match /events/{e} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      // The organizer can close a session ("Encerrar escolhas"); then only admins change choices.
+      function isOpen() {
+        return get(/databases/$(db)/documents/events/$(e)).data.get('closed', false) == false;
+      }
+      function canChange(owner) {
+        return signedIn() && ((owner == request.auth.uid && isOpen()) || isAdmin());
+      }
+
+      match /items/{i} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+
+      // Public: which slots are taken, without names. Id "{itemId}_{slot}" with slot < item.slots.
+      // A create on an id that already exists is an update, which is denied, so a slot is taken once.
+      // Always written and deleted in the same batch as the private signup with the same id.
+      match /taken/{s} {
+        allow read: if true;
+        allow create: if signedIn()
+          && (isOpen() || isAdmin())
+          && request.resource.data.keys().hasOnly(['itemId', 'uid', 'slot'])
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.itemId is string
+          && request.resource.data.slot is int
+          && request.resource.data.slot >= 0
+          && s == request.resource.data.itemId + '_' + string(request.resource.data.slot)
+          && request.resource.data.slot < get(/databases/$(db)/documents/events/$(e)/items/$(request.resource.data.itemId)).data.slots
+          && getAfter(/databases/$(db)/documents/events/$(e)/signups/$(s)).data.uid == request.auth.uid;
+        allow delete: if canChange(resource.data.uid)
+          && !existsAfter(/databases/$(db)/documents/events/$(e)/signups/$(s));
+      }
+
+      // Private: who brings what. Only the person who chose it (same anonymous account) and admins read it.
+      match /signups/{s} {
+        allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+        allow create: if signedIn()
+          && (isOpen() || isAdmin())
+          && request.resource.data.keys().hasOnly(['itemId', 'itemName', 'person', 'uid', 'createdAt', 'slot'])
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.person is string
+          && request.resource.data.person.size() > 0 && request.resource.data.person.size() <= 60
+          && request.resource.data.itemName is string
+          && request.resource.data.itemName.size() > 0 && request.resource.data.itemName.size() <= 80
+          && ((request.resource.data.itemId == null && !('slot' in request.resource.data))
+              || (request.resource.data.itemId is string
+                  && request.resource.data.slot is int
+                  && s == request.resource.data.itemId + '_' + string(request.resource.data.slot)
+                  && existsAfter(/databases/$(db)/documents/events/$(e)/taken/$(s))));
+        allow delete: if canChange(resource.data.uid)
+          && (resource.data.itemId == null || !existsAfter(/databases/$(db)/documents/events/$(e)/taken/$(s)));
+      }
+    }
+  }
+}

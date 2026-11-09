@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-09T00:00:00Z",
+  "title": "Design System: Lanche (organ-app)",
+  "extensions": {
+    "colorMeta": {
+      "sol": { "role": "primary", "displayName": "Sun Yellow", "canonical": "oklch(0.88 0.16 95)", "tonalRamp": [] },
+      "mata": { "role": "neutral", "displayName": "Deep Forest", "canonical": "oklch(0.975 0.012 140)", "tonalRamp": [] },
+      "folha": { "role": "neutral", "displayName": "Leaf Green", "canonical": "oklch(0.88 0.075 140)", "tonalRamp": [] },
+      "musgo": { "role": "neutral", "displayName": "Moss", "canonical": "oklch(0.91 0.01 140)", "tonalRamp": [] }
+    },
+    "typographyMeta": { "display": { "displayName": "Display", "purpose": "Event name." }, "numeral": { "displayName": "Numeral", "purpose": "Slots remaining on a band." } },
+    "shadows": [{ "name": "faixa", "value": "0 2px 6px oklch(0.15 0.04 150 / 0.35)", "purpose": "Tappable bands and primary button." }],
+    "motion": [{ "name": "band-state", "value": "300ms ease-out on background-color, transform", "purpose": "Band state and press feedback; off under reduced motion." }],
+    "breakpoints": [{ "name": "sm", "value": "640px" }]
+  },
+  "components": [
+    {
+      "name": "Item Band (open)", "kind": "card", "refersTo": "band-open",
+      "description": "Tappable open item with remaining slots.",
+      "html": "<button class=\"ds-band\"><span class=\"ds-name\">Bolo</span><span class=\"ds-left\"><b>3</b><small>faltam</small></span></button>",
+      "css": ".ds-band{display:flex;width:100%;align-items:center;gap:16px;padding:16px 20px;border:0;border-radius:1rem;background:var(--color-folha);color:var(--color-tinta);box-shadow:var(--shadow-faixa);text-align:left;font-family:inherit;transition:background-color .3s ease-out,transform .3s ease-out}.ds-band:hover{background:var(--color-folha-hover)}.ds-band:active{transform:scale(.98)}.ds-band:focus-visible{outline:3px solid var(--color-sol);outline-offset:3px}.ds-name{flex:1;font-size:1.25rem;font-weight:700}.ds-left{text-align:right;line-height:1}.ds-left b{display:block;font-size:2.25rem}.ds-left small{font-size:.875rem}"
+    },
+    {
+      "name": "Item Band (mine)", "kind": "card", "refersTo": "band-mine",
+      "description": "Member's own choice.",
+      "html": "<div class=\"ds-mine\"><span class=\"ds-name\">Bolo</span><u>Desistir</u></div>",
+      "css": ".ds-mine{display:flex;align-items:center;gap:16px;padding:16px 20px;border-radius:1rem;background:var(--color-sol);color:var(--color-tinta);box-shadow:var(--shadow-faixa)}.ds-name{flex:1;font-size:1.25rem;font-weight:700}"
+    },
+    {
+      "name": "Item Band (full)", "kind": "card", "refersTo": "band-full",
+      "description": "No slots left.",
+      "html": "<div class=\"ds-full\"><s>Suco</s><span>completo</span></div>",
+      "css": ".ds-full{display:flex;justify-content:space-between;padding:16px 20px;border-radius:1rem;background:var(--color-musgo);color:var(--color-nevoa);font-size:1.25rem;font-weight:700}.ds-full span{font-size:1rem;font-weight:400}"
+    },
+    {
+      "name": "Primary Button", "kind": "button", "refersTo": "button-primary",
+      "description": "Sun-yellow action.",
+      "html": "<button class=\"ds-btn\">+ Levo</button>",
+      "css": ".ds-btn{padding:16px 20px;border:0;border-radius:1rem;background:var(--color-sol);color:var(--color-tinta);font:700 1.125rem inherit;box-shadow:var(--shadow-faixa)}.ds-btn:active{transform:scale(.98)}.ds-btn:focus-visible{outline:3px solid var(--color-sol);outline-offset:3px}"
+    },
+    {
+      "name": "Text Input", "kind": "input", "refersTo": "input",
+      "description": "Leaf-filled borderless field.",
+      "html": "<input class=\"ds-input\" placeholder=\"Como te chamam no núcleo\">",
+      "css": ".ds-input{width:100%;box-sizing:border-box;padding:16px 20px;border:0;border-radius:1rem;background:var(--color-folha);color:var(--color-tinta);font:1.25rem inherit}.ds-input::placeholder{color:var(--color-tinta-suave)}.ds-input:focus-visible{outline:3px solid var(--color-sol);outline-offset:3px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Leaf Band",
+    "overview": "One tap on a wide leaf-green band over a deep forest ground. Large Atkinson type, sun yellow reserved for the member's choice and the primary action.",
+    "keyCharacteristics": ["Dark ground, light bands, dark ink", "Yellow means yours or do it", "Row state changes in place", "Single column, big numerals"],
+    "rules": [
+      { "name": "The Sun Rule", "body": "Yellow only on the member's own selection and the primary action.", "section": "colors" },
+      { "name": "The Big Enough Rule", "body": "Nothing under 0.875rem; interactive text 1.125rem or larger.", "section": "typography" }
+    ],
+    "dos": ["Do keep one message per band", "Do use only the @theme tokens"],
+    "donts": ["Don't use yellow decoratively", "Don't use card grids, borders or white backgrounds", "Don't remove full items from the list"]
+  }
+}

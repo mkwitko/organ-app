@@ -1,0 +1,47 @@
+@import "tailwindcss";
+@import "@fontsource-variable/atkinson-hyperlegible-next";
+
+@theme {
+  --font-sans: "Atkinson Hyperlegible Next Variable", system-ui, sans-serif;
+  --color-mata: oklch(0.975 0.012 140);
+  --color-mata-alta: oklch(0.935 0.025 140);
+  --color-folha: oklch(0.88 0.075 140);
+  --color-folha-hover: oklch(0.84 0.085 140);
+  --color-tinta: oklch(0.24 0.06 150);
+  --color-tinta-suave: oklch(0.38 0.05 150);
+  --color-sol: oklch(0.88 0.16 95);
+  --color-musgo: oklch(0.91 0.01 140);
+  --color-nevoa: oklch(0.3 0.04 150);
+  --color-alerta: oklch(0.5 0.16 35);
+  --color-papel: oklch(1 0 0);
+  --color-linha: oklch(0.24 0.06 150 / 0.1);
+  --shadow-faixa: 0 1px 2px oklch(0.3 0.05 150 / 0.06), 0 4px 16px -4px oklch(0.3 0.05 150 / 0.1);
+  --shadow-ergue: 0 2px 4px oklch(0.3 0.05 150 / 0.08), 0 12px 28px -8px oklch(0.3 0.05 150 / 0.18);
+}
+
+html {
+  background: var(--color-mata);
+  color: var(--color-nevoa);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+  font-variant-numeric: tabular-nums;
+  scrollbar-color: var(--color-musgo) var(--color-mata);
+}
+
+::selection {
+  background: var(--color-sol);
+  color: var(--color-tinta);
+}
+
+input {
+  caret-color: var(--color-tinta);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-tinta);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
