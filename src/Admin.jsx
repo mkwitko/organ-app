@@ -48,6 +48,7 @@ function Login({ email }) {
   const [form, setForm] = useState({ email: email ?? '', password: '' })
   const [msg, setMsg] = useState({ text: '', ok: false })
   const [show, setShow] = useState(false)
+  const [forgot, setForgot] = useState(false)
   const [busy, setBusy] = useState(false)
 
   async function login(e) {
@@ -62,11 +63,16 @@ function Login({ email }) {
     setBusy(false)
   }
 
-  async function reset() {
-    if (!form.email.trim()) return setMsg({ text: 'Escreva seu email acima para receber o link.', ok: false })
-    await sendPasswordResetEmail(auth, form.email.trim()).catch(() => {})
-    setMsg({ text: 'Se esse email tiver conta, chegará um link para criar nova senha.', ok: true })
+  async function reset(e) {
+    e.preventDefault()
+    setBusy(true)
+    const err = await sendPasswordResetEmail(auth, form.email.trim()).then(() => null, (x) => x.code)
+    setBusy(false)
+    // Same answer whether or not the email has an account, so nobody can probe who is an admin.
+    if (err === 'auth/network-request-failed' || err === 'auth/too-many-requests') return setMsg({ text: loginError(err), ok: false })
+    setMsg({ text: 'Pronto! Se esse email tiver acesso, chega em alguns minutos um link para criar nova senha. Veja também o spam.', ok: true })
   }
+  const switchTo = (f) => { setForgot(f); setMsg({ text: '', ok: false }) }
 
   return (
     <div className="mx-auto max-w-md pt-4 sm:pt-10">
@@ -87,6 +93,18 @@ function Login({ email }) {
           <p className="mt-2 text-lg">Peça a quem cuida do app para incluir você.</p>
           <button onClick={() => signOut(auth)} className={`${ghost} mt-6 w-full`}><LogOut aria-hidden size={20} /> Entrar com outro email</button>
         </div>
+      ) : forgot ? (
+        <form onSubmit={reset} className="mt-8 rounded-2xl vidro p-6 shadow-faixa ring-1 ring-linha">
+          <h2 className="text-xl font-bold text-tinta">Criar nova senha</h2>
+          <p className="mt-2 text-lg">Escreva seu email. Vamos mandar um link para você criar uma senha nova.</p>
+          <label className="mt-6 block text-lg font-bold text-tinta">
+            Email
+            <input type="email" autoComplete="username" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={`${field} mt-2 block w-full font-normal`} autoFocus />
+          </label>
+          <p aria-live="polite" className={`mt-3 min-h-7 text-lg font-bold ${msg.ok ? 'text-tinta' : 'text-alerta'}`}>{msg.text}</p>
+          <button disabled={busy} className={`${primary} mt-2 w-full`}>{busy ? 'Enviando…' : 'Enviar email'}</button>
+          <button type="button" onClick={() => switchTo(false)} className="mt-4 min-h-11 w-full text-lg text-tinta underline underline-offset-4">Voltar para entrar</button>
+        </form>
       ) : (
         <form onSubmit={login} className="mt-8 rounded-2xl vidro p-6 shadow-faixa ring-1 ring-linha">
           <p className="text-lg">Entre para montar a lista de cada sessão e ver quem leva o quê.</p>
@@ -105,7 +123,7 @@ function Login({ email }) {
           </label>
           <p aria-live="polite" className={`mt-3 min-h-7 text-lg font-bold ${msg.ok ? 'text-tinta' : 'text-alerta'}`}>{msg.text}</p>
           <button disabled={busy} className={`${primary} mt-2 w-full`}>{busy ? 'Entrando…' : 'Entrar'}</button>
-          <button type="button" onClick={reset} className="mt-4 min-h-11 w-full text-lg text-tinta underline underline-offset-4">Esqueci a senha</button>
+          <button type="button" onClick={() => switchTo(true)} className="mt-4 min-h-11 w-full text-lg text-tinta underline underline-offset-4">Esqueci a senha</button>
         </form>
       )}
 
@@ -148,7 +166,7 @@ function Panel() {
         {events.length > 0 && (
           <label className="min-w-0 basis-full text-base font-bold text-tinta-suave sm:max-w-xl sm:flex-1 sm:basis-auto">
             Sessão
-            <select value={ev.id} onChange={(e) => setSel(e.target.value)} className={`${field} mt-1.5 block w-full font-bold`}>
+            <select value={ev.id} onChange={(e) => setSel(e.target.value)} className={`${field} mt-1.5 block w-full !pr-12 font-bold`}>
               {events.map((e) => (
                 <option key={e.id} value={e.id}>{e.name} — {fmtDate(e.date, { day: '2-digit', month: '2-digit', year: 'numeric' })}</option>
               ))}
@@ -168,7 +186,7 @@ function Panel() {
           {events.length > 0 && (
             <label className="block text-base font-bold text-tinta-suave sm:col-span-2">
               Copiar os itens de
-              <select value={form.copyFrom} onChange={(e) => setForm({ ...form, copyFrom: e.target.value })} className={`${field} mt-1.5 block w-full`}>
+              <select value={form.copyFrom} onChange={(e) => setForm({ ...form, copyFrom: e.target.value })} className={`${field} mt-1.5 block w-full !pr-12`}>
                 <option value="">Nenhuma (começar vazia)</option>
                 {events.map((e) => (
                   <option key={e.id} value={e.id}>{e.name} — {fmtDate(e.date, { day: '2-digit', month: '2-digit' })}</option>
