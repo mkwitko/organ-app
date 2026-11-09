@@ -207,3 +207,7 @@ Mata-alta 1rem panels with 1.25rem padding for forms and event lists; alerta for
 - **Inputs:** 1px ring at 15% ink, 1px at 55% on focus plus a 4px halo at 8% ink. The global 3px focus outline lives in `@layer base` and skips text fields.
 - **Icons:** 13 more fruits (Fluent Emoji Flat). The icon is optional (`icon: ''` hides the tile). The picker has a search field that matches labels and name keywords without accents, plus a "Sem ícone" choice.
 - **Item instructions:** optional `note` (up to 120 chars) shows under the item name on both pages, in the review dialog and in the WhatsApp list as `— _note_`.
+
+## Revision 2026-11-09 (h) — user request
+
+- Removed icons: coxinha, lanche, cachorro-quente, rosquinha, doce, chocolate, sorvete, salada, sopa, ovo, café, chá, leite, gelo, copos/talheres, guardanapo. "Pudim / sobremesa" is now "Sobremesa". Items saved with a removed icon show no icon. "Coxinha" now suggests the salgado icon.

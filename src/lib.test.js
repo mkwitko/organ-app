@@ -33,16 +33,14 @@ test('suggestIcon', async () => {
   assert.equal(suggestIcon('Pão de queijo'), 'paodequeijo')
   assert.equal(suggestIcon('Pão francês'), 'pao')
   assert.equal(suggestIcon('Refrigerante 2L'), 'refrigerante')
-  assert.equal(suggestIcon('Copos e guardanapos'), 'descartaveis')
-  assert.equal(suggestIcon('Chá mate'), 'cha')
+  assert.equal(suggestIcon('Copos e guardanapos'), null)
+  assert.equal(suggestIcon('Pudim de leite'), 'sobremesa')
   assert.equal(suggestIcon('Suco de laranja'), 'suco')
-  assert.equal(suggestIcon('Coxinha'), 'coxinha')
-  assert.equal(suggestIcon('Guardanapos'), 'guardanapo')
+  assert.equal(suggestIcon('Coxinha'), 'salgado')
   assert.equal(suggestIcon('Maçã'), 'maca')
   assert.equal(suggestIcon('Macarrão'), null)
   assert.equal(suggestIcon('Abacaxi picado'), 'abacaxi')
   assert.equal(suggestIcon('Bolo de morango'), 'bolo')
-  assert.equal(suggestIcon('Chantilly'), null) // keyword "cha " needs a word end
 })
 
 test('freeSlot', async () => {

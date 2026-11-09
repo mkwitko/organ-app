@@ -3,7 +3,7 @@ import { CalendarDays, Check, Lock, Plus, Smartphone, UserRound, WifiOff, X } fr
 import { useEffect, useRef, useState } from 'react'
 import Admin from './Admin.jsx'
 import { addChoice, db, removeChoice, useOnline, useSnap, useUid } from './firebase.js'
-import { iconSrc } from './icons.js'
+import { ICONS, iconSrc } from './icons.js'
 import { fmtDate, freeSlot, itemStatus, suggestIcon, today } from './lib.js'
 
 export default function App() {
@@ -342,7 +342,7 @@ export function Progress({ have, need }) {
 
 // icon '' = the organizer chose no icon.
 export function ItemIcon({ icon, className = '' }) {
-  if (icon === '') return null
+  if (icon === '' || (icon && !ICONS[icon])) return null
   return (
     <span className={`grid size-14 shrink-0 place-items-center rounded-2xl ${className}`}>
       <img src={iconSrc(icon)} alt="" className="size-9" />
