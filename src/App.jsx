@@ -138,12 +138,14 @@ function Home() {
   const closed = !!ev.closed
 
   function cancel(s) {
+    if (!window.confirm(`Cancelar "${s.itemName}"? Ele volta para a lista e outra pessoa pode escolher.`)) return
     const b = writeBatch(db)
     removeChoice(b, db, ev.id, s)
     b.commit().catch(() => setMsg('Não foi possível cancelar. Verifique a internet e tente de novo.'))
   }
 
   const mineExtras = mine?.filter((s) => isMine(s) && !s.itemId) ?? []
+  const mineAll = mine?.filter(isMine) ?? []
 
   return (
     <Shell>
@@ -169,6 +171,12 @@ function Home() {
           className={`${field} mt-3 block w-full`}
         />
         <p role="alert" className="mt-2 min-h-7 text-lg font-bold text-alerta">{msg}</p>
+        {mineAll.length > 0 && (
+          <p className="mb-3 flex items-start gap-3 rounded-2xl bg-folha/60 px-5 py-3 text-lg text-tinta ring-1 ring-tinta/15">
+            <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-tinta text-papel"><Check aria-hidden size={15} strokeWidth={3.5} /></span>
+            <span>Você vai levar: <b>{mineAll.map((s) => s.itemName).join(', ')}</b></span>
+          </p>
+        )}
         {name.trim() && !closed && (
           <button onClick={otherPerson} className="flex min-h-11 items-center gap-2 text-lg text-tinta-suave underline underline-offset-4">
             <UserRound aria-hidden size={20} /> Escolher para outra pessoa

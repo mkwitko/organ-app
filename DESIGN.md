@@ -193,3 +193,9 @@ Mata-alta 1rem panels with 1.25rem padding for forms and event lists; alerta for
 - Item icons are now colored Fluent Emoji Flat SVGs (MIT, Microsoft) served from `public/icons/{key}.svg`, shown on a 56px tile. Full items show the icon in grayscale at 60% opacity.
 - Inputs: 1px ring at 20% ink, 2px ring at 70% ink on focus, no outline; corner radius 12px.
 - Organizer screen: brand line and account at the top; session select next to "Nova sessão" (form opens inline); a summary card holds the name, date, open/closed pill, a progress bar and all actions; the add-item form is one row with a collapsible icon picker; "Apagar esta sessão" sits alone below a divider.
+
+## Revision 2026-11-09 (f)
+
+- Member page: a leaf strip under the name field lists "Você vai levar: …" for the current person. Cancelling a confirmed choice asks first.
+- Admin on phones: the session select and "Nova sessão" stack full width; summary actions form a 2-column grid (WhatsApp and Encerrar span both columns). Item cards put the icon and the edit/remove buttons on one row and the name full width below. Remove buttons on name chips are 36px.
+- Admin login: heading "Organização" with "App da Organ" below it, no eyebrow label.

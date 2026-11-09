@@ -73,8 +73,8 @@ function Login({ email }) {
       <div className="flex items-center gap-3">
         <img src="/icon-192.png" alt="" className="size-14 rounded-2xl shadow-faixa" />
         <div>
-          <p className="text-base font-bold uppercase tracking-wider text-tinta-suave">App da Organ</p>
-          <h1 className="text-3xl font-bold text-tinta">Organização</h1>
+          <h1 className="text-3xl font-bold leading-tight text-tinta">Organização</h1>
+          <p className="text-lg text-tinta-suave">App da Organ</p>
         </div>
       </div>
 
@@ -146,7 +146,7 @@ function Panel() {
     <>
       <div className="mt-6 flex flex-wrap items-end gap-3 print:hidden">
         {events.length > 0 && (
-          <label className="min-w-0 max-w-xl flex-1 text-base font-bold text-tinta-suave">
+          <label className="min-w-0 basis-full text-base font-bold text-tinta-suave sm:max-w-xl sm:flex-1 sm:basis-auto">
             Sessão
             <select value={ev.id} onChange={(e) => setSel(e.target.value)} className={`${field} mt-1.5 block w-full font-bold`}>
               {events.map((e) => (
@@ -155,7 +155,7 @@ function Panel() {
             </select>
           </label>
         )}
-        <button onClick={() => setCreating(!creating)} aria-expanded={creating} className={ghost}>
+        <button onClick={() => setCreating(!creating)} aria-expanded={creating} className={`${ghost} w-full sm:w-auto`}>
           <Plus aria-hidden size={20} /> Nova sessão
         </button>
       </div>
@@ -249,9 +249,9 @@ function EventPanel({ ev }) {
   }
 
   async function copy(what, text) {
-    await navigator.clipboard.writeText(text)
-    setCopied(what)
-    setTimeout(() => setCopied(''), 2000)
+    const ok = await navigator.clipboard.writeText(text).then(() => true, () => false)
+    setCopied(ok ? what : 'erro')
+    setTimeout(() => setCopied(''), ok ? 2000 : 5000)
   }
 
   const toggleClosed = () => updateDoc(doc(db, 'events', ev.id), { closed: !ev.closed })
@@ -280,14 +280,15 @@ function EventPanel({ ev }) {
           </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-2">
-          <button onClick={() => copy('lista', listText(ev, items, signups))} className={primary}><Copy aria-hidden size={20} /> {copied === 'lista' ? 'Lista copiada!' : 'Copiar lista p/ WhatsApp'}</button>
-          <button onClick={() => window.print()} className={ghost}><Printer aria-hidden size={20} /> Imprimir</button>
-          <button onClick={() => copy('link', location.origin)} className={ghost}><Link2 aria-hidden size={20} /> {copied === 'link' ? 'Link copiado!' : 'Copiar link do app'}</button>
-          <button onClick={toggleClosed} className={ghost}>
+        <div className="mt-6 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+          <button onClick={() => copy('lista', listText(ev, items, signups))} className={`${primary} col-span-2`}><Copy aria-hidden size={20} /> {copied === 'lista' ? 'Lista copiada!' : 'Copiar lista p/ WhatsApp'}</button>
+          <button onClick={() => window.print()} className={`${ghost} whitespace-nowrap !px-3 sm:!px-5`}><Printer aria-hidden size={20} /> Imprimir</button>
+          <button onClick={() => copy('link', location.origin)} className={`${ghost} whitespace-nowrap !px-3 sm:!px-5`}><Link2 aria-hidden size={20} /> {copied === 'link' ? 'Link copiado!' : 'Copiar link'}</button>
+          <button onClick={toggleClosed} className={`${ghost} col-span-2`}>
             {ev.closed ? <><LockOpen aria-hidden size={20} /> Reabrir escolhas</> : <><Lock aria-hidden size={20} /> Encerrar escolhas</>}
           </button>
         </div>
+        {copied === 'erro' && <p role="alert" className="mt-3 text-base font-bold text-alerta">Não deu para copiar. Tente de novo ou use Imprimir.</p>}
         {ev.closed && <p className="mt-3 text-base text-tinta-suave">Os sócios só veem a lista. Você ainda pode adicionar ou tirar pessoas.</p>}
       </section>
 
@@ -306,7 +307,7 @@ function EventPanel({ ev }) {
             <input required type="number" min={1} max={50} value={item.slots} onChange={(e) => setItem({ ...item, slots: e.target.value })} className={`${field} w-20 text-center`} />
             pessoas
           </label>
-          <button className={primary}><Plus aria-hidden size={22} /> Adicionar</button>
+          <button className={`${primary} flex-1 sm:flex-none`}><Plus aria-hidden size={22} /> Adicionar</button>
         </div>
         {picking && <IconPicker value={icon} onChange={(k) => { setItem({ ...item, icon: k }); setPicking(false) }} />}
         {!picking && <p className="mt-2 text-base text-tinta-suave">O ícone é escolhido pelo nome. Toque nele para trocar.</p>}
@@ -322,15 +323,15 @@ function EventPanel({ ev }) {
                 <ItemEditor item={it} min={taken.length} onDone={() => setEditing(null)} save={(data) => updateDoc(doc(db, 'events', ev.id, 'items', it.id), data)} />
               ) : (
                 <>
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start justify-between gap-3">
                     <ItemIcon icon={it.icon ?? suggestIcon(it.name)} className="bg-mata-alta" />
-                    <span className="flex-1 self-center text-xl font-bold leading-snug">{it.name}</span>
                     <div className="-mr-2 -mt-1 flex">
-                      <button onClick={() => setEditing(it.id)} aria-label={`Editar ${it.name}`} className="grid size-10 place-items-center rounded-xl text-tinta-suave hover:bg-mata-alta hover:text-tinta"><Pencil size={18} /></button>
-                      <button onClick={() => removeItem(it)} aria-label={`Remover ${it.name}`} className="grid size-10 place-items-center rounded-xl text-tinta-suave hover:bg-alerta/10 hover:text-alerta"><Trash2 size={18} /></button>
+                      <button onClick={() => setEditing(it.id)} aria-label={`Editar ${it.name}`} className="grid size-11 place-items-center rounded-xl text-tinta-suave hover:bg-mata-alta hover:text-tinta"><Pencil size={20} /></button>
+                      <button onClick={() => removeItem(it)} aria-label={`Remover ${it.name}`} className="grid size-11 place-items-center rounded-xl text-tinta-suave hover:bg-alerta/10 hover:text-alerta"><Trash2 size={20} /></button>
                     </div>
                   </div>
-                  <div className="mt-4"><Progress have={taken.length} need={it.slots} /></div>
+                  <span className="mt-3 text-xl font-bold leading-snug">{it.name}</span>
+                  <div className="mt-3"><Progress have={taken.length} need={it.slots} /></div>
                   <People list={taken} onRemove={removeSignup} />
                   <div className="mt-auto">
                     {adding === it.id ? (
@@ -415,9 +416,9 @@ function People({ list, onRemove }) {
   return (
     <ul className="mt-4 flex flex-wrap gap-2">
       {list.map((s) => (
-        <li key={s.id} className="flex items-center gap-1 rounded-full bg-mata-alta py-1 pl-3 pr-1 text-base">
+        <li key={s.id} className="flex items-center gap-1 rounded-full bg-mata-alta py-0.5 pl-3.5 pr-0.5 text-base">
           {s.person}
-          <button onClick={() => onRemove(s)} aria-label={`Tirar ${s.person}`} className="rounded-full p-1"><X size={16} /></button>
+          <button onClick={() => onRemove(s)} aria-label={`Tirar ${s.person}`} className="grid size-9 place-items-center rounded-full text-tinta-suave hover:bg-alerta/10 hover:text-alerta"><X size={18} /></button>
         </li>
       ))}
     </ul>
