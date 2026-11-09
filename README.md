@@ -2,7 +2,7 @@
 
 Um link para combinar **quem leva o quê** no lanche de cada sessão, no lugar da conversa longa no WhatsApp.
 
-**No ar:** https://organ-app-6e194.web.app · **Organização:** https://organ-app-6e194.web.app/admin
+**No ar:** https://app-da-organ.web.app · **Organização:** https://app-da-organ.web.app/admin
 
 Este guia tem três partes:
 
@@ -164,7 +164,7 @@ Tudo pelo console do Firebase:
 
 O App Check bloqueia programas que tentam usar o banco fora do site.
 
-1. No [Google Cloud → reCAPTCHA](https://console.cloud.google.com/security/recaptcha?project=organ-app-6e194), crie uma chave do tipo **Site** para os domínios `organ-app-6e194.web.app` e `organ-app-6e194.firebaseapp.com`, **sem** o desafio de caixa de seleção.
+1. No [Google Cloud → reCAPTCHA](https://console.cloud.google.com/security/recaptcha?project=organ-app-6e194), crie uma chave do tipo **Site** para os domínios `app-da-organ.web.app`, `organ-app-6e194.web.app` e `organ-app-6e194.firebaseapp.com`, **sem** o desafio de caixa de seleção.
 2. No [Firebase → App Check](https://console.firebase.google.com/project/organ-app-6e194/appcheck), registre o app web com essa chave.
 3. Coloque a chave em `VITE_RECAPTCHA_KEY` e rode `npm run deploy`.
 4. Depois de 1 ou 2 dias, veja se quase 100% das requisições aparecem como verificadas. Só então ative **Aplicar** (Enforce) no Firestore e no Authentication.
