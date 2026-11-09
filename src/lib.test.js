@@ -4,7 +4,7 @@ import { itemStatus, listText } from './lib.js'
 
 const items = [
   { id: 'a', name: 'Bolo', slots: 3 },
-  { id: 'b', name: 'Suco', slots: 1 },
+  { id: 'b', name: 'Suco', slots: 1, note: 'gelado' },
 ]
 const signups = [
   { itemId: 'a', itemName: 'Bolo', person: 'Ana' },
@@ -22,7 +22,7 @@ test('listText', () => {
   const txt = listText({ name: 'Natal', date: '2026-12-20' }, items, signups)
   assert.match(txt, /\*Lanche — Natal \(20\/12\)\*/)
   assert.match(txt, /• Bolo \(1 de 3\): Ana ⚠️/)
-  assert.match(txt, /• Suco \(2 de 1\): João, Extra ✅$/m)
+  assert.match(txt, /• Suco — _gelado_ \(2 de 1\): João, Extra ✅$/m)
   assert.match(txt, /• Pão de queijo: Maria/)
 })
 
@@ -38,6 +38,10 @@ test('suggestIcon', async () => {
   assert.equal(suggestIcon('Suco de laranja'), 'suco')
   assert.equal(suggestIcon('Coxinha'), 'coxinha')
   assert.equal(suggestIcon('Guardanapos'), 'guardanapo')
+  assert.equal(suggestIcon('Maçã'), 'maca')
+  assert.equal(suggestIcon('Macarrão'), null)
+  assert.equal(suggestIcon('Abacaxi picado'), 'abacaxi')
+  assert.equal(suggestIcon('Bolo de morango'), 'bolo')
   assert.equal(suggestIcon('Chantilly'), null) // keyword "cha " needs a word end
 })
 

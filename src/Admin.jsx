@@ -1,11 +1,11 @@
 import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, updateDoc, writeBatch } from 'firebase/firestore'
-import { ChevronDown, Copy, Eye, EyeOff, Link2, Lock, LockOpen, LogOut, Pencil, Plus, Printer, Trash2, UserPlus, X } from 'lucide-react'
+import { Ban, ChevronDown, Copy, Eye, EyeOff, Link2, Search, Lock, LockOpen, LogOut, Pencil, Plus, Printer, Trash2, UserPlus, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { ItemIcon, Progress, Shell, field, primary } from './App.jsx'
 import { ICONS, iconSrc } from './icons.js'
 import { sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { addChoice, adminAuth as auth, adminDb as db, removeChoice, useSnap, useUser } from './firebase.js'
-import { fmtDate, freeSlot, itemStatus, listText, suggestIcon, today } from './lib.js'
+import { ICON_KEYWORDS, fmtDate, freeSlot, itemStatus, listText, plain, suggestIcon, today } from './lib.js'
 
 export default function Admin() {
   const user = useUser(auth)
@@ -79,7 +79,7 @@ function Login({ email }) {
       </div>
 
       {email ? (
-        <div className="mt-8 rounded-3xl bg-papel p-6 shadow-faixa ring-1 ring-linha">
+        <div className="mt-8 rounded-2xl vidro p-6 shadow-faixa ring-1 ring-linha">
           <p className="flex items-center gap-2 text-xl font-bold text-tinta"><Lock aria-hidden size={22} /> Sem acesso</p>
           <p className="mt-3 text-lg">
             Você entrou como <b className="break-all text-tinta">{email}</b>, mas esse email não está na lista da organização.
@@ -88,7 +88,7 @@ function Login({ email }) {
           <button onClick={() => signOut(auth)} className={`${ghost} mt-6 w-full`}><LogOut aria-hidden size={20} /> Entrar com outro email</button>
         </div>
       ) : (
-        <form onSubmit={login} className="mt-8 rounded-3xl bg-papel p-6 shadow-faixa ring-1 ring-linha">
+        <form onSubmit={login} className="mt-8 rounded-2xl vidro p-6 shadow-faixa ring-1 ring-linha">
           <p className="text-lg">Entre para montar a lista de cada sessão e ver quem leva o quê.</p>
           <label className="mt-6 block text-lg font-bold text-tinta">
             Email
@@ -132,8 +132,8 @@ function Panel() {
       const src = await getDocs(query(collection(db, 'events', form.copyFrom, 'items'), orderBy('createdAt')))
       const b = writeBatch(db)
       src.forEach((d) => {
-        const { name, slots, icon } = d.data()
-        b.set(doc(collection(db, 'events', ref.id, 'items')), { name, slots, icon: icon ?? suggestIcon(name) ?? 'outro', createdAt: serverTimestamp() })
+        const { name, slots, icon, note = '' } = d.data()
+        b.set(doc(collection(db, 'events', ref.id, 'items')), { name, slots, icon: icon ?? suggestIcon(name) ?? 'outro', note, createdAt: serverTimestamp() })
       })
       await b.commit()
     }
@@ -161,7 +161,7 @@ function Panel() {
       </div>
 
       {showForm && (
-        <form onSubmit={createEvent} className="mt-4 grid max-w-3xl gap-3 rounded-3xl bg-papel p-5 shadow-faixa ring-1 ring-linha sm:grid-cols-2 print:hidden">
+        <form onSubmit={createEvent} className="mt-4 grid max-w-3xl gap-3 rounded-2xl vidro p-5 shadow-faixa ring-1 ring-linha sm:grid-cols-2 print:hidden">
           <h2 className="text-xl font-bold text-tinta sm:col-span-2">Nova sessão</h2>
           <input required maxLength={80} placeholder="Nome (ex.: Sessão de Natal)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={`${field} block w-full`} />
           <input required type="date" aria-label="Data" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className={`${field} block w-full`} />
@@ -193,7 +193,7 @@ const ghost = 'flex min-h-14 shrink-0 items-center justify-center gap-2 rounded-
 function EventPanel({ ev }) {
   const items = useSnap(query(collection(db, 'events', ev.id, 'items'), orderBy('createdAt')), [ev.id])
   const signups = useSnap(query(collection(db, 'events', ev.id, 'signups'), orderBy('createdAt')), [ev.id])
-  const [item, setItem] = useState({ name: '', slots: 1, icon: null })
+  const [item, setItem] = useState({ name: '', slots: 1, icon: null, note: '' })
   const [editing, setEditing] = useState(null) // item id being edited
   const [adding, setAdding] = useState(null) // item id getting a person added by the organizer
   const [picking, setPicking] = useState(false) // icon grid open in the add-item form
@@ -211,8 +211,8 @@ function EventPanel({ ev }) {
 
   async function addItem(e) {
     e.preventDefault()
-    await addDoc(collection(db, 'events', ev.id, 'items'), { name: item.name.trim(), slots: Number(item.slots), icon, createdAt: serverTimestamp() })
-    setItem({ name: '', slots: 1, icon: null })
+    await addDoc(collection(db, 'events', ev.id, 'items'), { name: item.name.trim(), slots: Number(item.slots), icon, note: item.note.trim(), createdAt: serverTimestamp() })
+    setItem({ name: '', slots: 1, icon: null, note: '' })
   }
 
   async function removeItem(it) {
@@ -261,7 +261,7 @@ function EventPanel({ ev }) {
     <>
     <PrintList ev={ev} items={items} signups={signups} />
     <div className="print:hidden">
-      <section className="mt-6 rounded-3xl bg-papel p-6 shadow-faixa ring-1 ring-linha sm:p-8">
+      <section className="mt-6 rounded-2xl vidro p-6 shadow-faixa ring-1 ring-linha sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-balance text-3xl font-bold leading-tight text-tinta sm:text-4xl">{ev.name}</h1>
@@ -296,10 +296,10 @@ function EventPanel({ ev }) {
         <h2 className="text-2xl font-bold text-tinta">Itens <span className="font-normal text-tinta-suave">({items.length})</span></h2>
       </div>
 
-      <form onSubmit={addItem} className="mt-4 rounded-3xl bg-papel p-4 shadow-faixa ring-1 ring-linha sm:p-5">
+      <form onSubmit={addItem} className="mt-4 rounded-2xl vidro p-4 shadow-faixa ring-1 ring-linha sm:p-5">
         <div className="flex flex-wrap items-center gap-2">
-          <button type="button" onClick={() => setPicking(!picking)} aria-expanded={picking} aria-label={`Ícone: ${ICONS[icon]}. Trocar`} className="flex items-center gap-1 rounded-2xl bg-mata-alta p-1.5 pr-2 ring-1 ring-tinta/10 hover:bg-folha">
-            <img src={iconSrc(icon)} alt="" className="size-10" />
+          <button type="button" onClick={() => setPicking(!picking)} aria-expanded={picking} aria-label={`Ícone: ${ICONS[icon] ?? 'nenhum'}. Trocar`} className="flex items-center gap-1 rounded-2xl bg-mata-alta p-1.5 pr-2 ring-1 ring-tinta/10 hover:bg-folha">
+            {icon ? <img src={iconSrc(icon)} alt="" className="size-10" /> : <span className="grid size-10 place-items-center text-tinta-suave"><Ban aria-hidden size={22} /></span>}
             <ChevronDown aria-hidden size={18} className={`transition-transform ${picking ? 'rotate-180' : ''}`} />
           </button>
           <input required maxLength={80} placeholder="Novo item (ex.: bolo)" aria-label="Nome do item" value={item.name} onChange={(e) => setItem({ ...item, name: e.target.value })} className={`${field} min-w-40 flex-1`} />
@@ -309,8 +309,9 @@ function EventPanel({ ev }) {
           </label>
           <button className={`${primary} flex-1 sm:flex-none`}><Plus aria-hidden size={22} /> Adicionar</button>
         </div>
+        <input maxLength={120} placeholder="Instruções (opcional), ex.: trazer fatiada" aria-label="Instruções para quem vai levar" value={item.note} onChange={(e) => setItem({ ...item, note: e.target.value })} className={`${field} mt-2 block w-full !text-lg`} />
         {picking && <IconPicker value={icon} onChange={(k) => { setItem({ ...item, icon: k }); setPicking(false) }} />}
-        {!picking && <p className="mt-2 text-base text-tinta-suave">O ícone é escolhido pelo nome. Toque nele para trocar.</p>}
+        {!picking && <p className="mt-2 text-base text-tinta-suave">O ícone é escolhido pelo nome. Toque nele para trocar ou tirar.</p>}
       </form>
 
       <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -318,7 +319,7 @@ function EventPanel({ ev }) {
         {items.map((it) => {
           const { taken } = itemStatus(it, signups)
           return (
-            <li key={it.id} className="flex flex-col rounded-3xl bg-papel p-5 text-tinta shadow-faixa ring-1 ring-linha">
+            <li key={it.id} className="flex flex-col rounded-2xl vidro p-5 text-tinta shadow-faixa ring-1 ring-linha">
               {editing === it.id ? (
                 <ItemEditor item={it} min={taken.length} onDone={() => setEditing(null)} save={(data) => updateDoc(doc(db, 'events', ev.id, 'items', it.id), data)} />
               ) : (
@@ -331,6 +332,7 @@ function EventPanel({ ev }) {
                     </div>
                   </div>
                   <span className="mt-3 text-xl font-bold leading-snug">{it.name}</span>
+                  {it.note && <span className="mt-1 text-base text-tinta-suave">{it.note}</span>}
                   <div className="mt-3"><Progress have={taken.length} need={it.slots} /></div>
                   <People list={taken} onRemove={removeSignup} />
                   <div className="mt-auto">
@@ -356,7 +358,7 @@ function EventPanel({ ev }) {
           <h2 className="mt-12 text-2xl font-bold text-tinta">Outras contribuições <span className="font-normal text-tinta-suave">({extras.length})</span></h2>
           <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {extras.map((s) => (
-              <li key={s.id} className="flex items-center gap-3 rounded-2xl bg-papel py-3 pl-4 pr-2 text-lg text-tinta shadow-faixa ring-1 ring-linha">
+              <li key={s.id} className="flex items-center gap-3 rounded-2xl vidro py-3 pl-4 pr-2 text-lg text-tinta shadow-faixa ring-1 ring-linha">
                 <ItemIcon icon={suggestIcon(s.itemName)} className="!size-11 bg-mata-alta [&>img]:!size-7" />
                 <span className="min-w-0 flex-1"><b className="block truncate">{s.itemName}</b><span className="text-base text-tinta-suave">{s.person}</span></span>
                 <button onClick={() => removeSignup(s)} aria-label={`Tirar ${s.person}`} className="grid size-10 place-items-center rounded-xl text-tinta-suave hover:bg-alerta/10 hover:text-alerta"><X size={18} /></button>
@@ -425,10 +427,28 @@ function People({ list, onRemove }) {
   )
 }
 
+// Searches labels and the name keywords, without accents ("maca" finds Maçã).
+const iconWords = Object.fromEntries(ICON_KEYWORDS)
 function IconPicker({ value, onChange, compact }) {
+  const [q, setQ] = useState('')
+  const term = plain(q).trim()
+  const list = Object.entries(ICONS).filter(([key, label]) => !term || plain(label).includes(term) || (iconWords[key] ?? []).some((w) => w.includes(term)))
   return (
-    <div role="radiogroup" aria-label="Ícone" className={`mt-3 grid gap-1.5 ${compact ? 'grid-cols-6' : 'grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10'}`}>
-      {Object.entries(ICONS).map(([key, label]) => (
+    <div className="mt-3">
+    <label className="relative block">
+      <Search aria-hidden size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-tinta-suave" />
+      <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar ícone (ex.: manga)" aria-label="Buscar ícone" className={`${field} block w-full !py-2.5 pl-10 !text-base`} />
+    </label>
+    <div role="radiogroup" aria-label="Ícone" className={`mt-2 grid max-h-72 gap-1.5 overflow-y-auto ${compact ? 'grid-cols-5' : 'grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10'}`}>
+      {!term && (
+        <button type="button" role="radio" aria-checked={value === ''} aria-label="Sem ícone" title="Sem ícone" onClick={() => onChange('')}
+          className={`flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-xs text-tinta-suave ${value === '' ? 'bg-folha ring-2 ring-tinta' : 'hover:bg-mata-alta'}`}>
+          <Ban aria-hidden className={compact ? 'size-7' : 'size-9'} strokeWidth={1.5} />
+          {!compact && <span>Sem ícone</span>}
+        </button>
+      )}
+      {list.length === 0 && <p className="col-span-full py-2 text-base text-tinta-suave">Nenhum ícone com "{q}".</p>}
+      {list.map(([key, label]) => (
         <button
           key={key}
           type="button"
@@ -444,16 +464,17 @@ function IconPicker({ value, onChange, compact }) {
         </button>
       ))}
     </div>
+    </div>
   )
 }
 
 function ItemEditor({ item, min, save, onDone }) {
-  const [v, setV] = useState({ name: item.name, slots: item.slots, icon: item.icon ?? suggestIcon(item.name) ?? 'outro' })
+  const [v, setV] = useState({ name: item.name, slots: item.slots, note: item.note ?? '', icon: item.icon ?? suggestIcon(item.name) ?? 'outro' })
   return (
     <form
       onSubmit={async (e) => {
         e.preventDefault()
-        await save({ name: v.name.trim(), slots: Number(v.slots), icon: v.icon })
+        await save({ name: v.name.trim(), slots: Number(v.slots), note: v.note.trim(), icon: v.icon })
         onDone()
       }}
     >
@@ -461,6 +482,7 @@ function ItemEditor({ item, min, save, onDone }) {
         <input required maxLength={80} aria-label="Nome do item" value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} className={`${field} min-w-0 flex-1 !px-4 !py-3 !text-lg`} />
         <input required type="number" min={Math.max(1, min)} max={50} aria-label="Quantas pessoas" value={v.slots} onChange={(e) => setV({ ...v, slots: e.target.value })} className={`${field} w-20 !px-2 !py-3 text-center !text-lg`} />
       </div>
+      <input maxLength={120} placeholder="Instruções (opcional)" aria-label="Instruções" value={v.note} onChange={(e) => setV({ ...v, note: e.target.value })} className={`${field} mt-2 block w-full !px-4 !py-2.5 !text-base`} />
       {min > 0 && <p className="mt-1 text-sm text-tinta-suave">Mínimo {min}: já tem {min} {min > 1 ? 'pessoas' : 'pessoa'}.</p>}
       <IconPicker value={v.icon} onChange={(k) => setV({ ...v, icon: k })} compact />
       <div className="mt-4 flex gap-2">

@@ -20,7 +20,7 @@ export function Shell({ children }) {
   return <main className="mx-auto min-h-dvh max-w-7xl px-4 pb-40 pt-10 sm:px-8 sm:pt-14">{children}</main>
 }
 
-export const field = 'rounded-xl bg-papel px-4 py-3.5 text-xl text-tinta ring-1 ring-tinta/20 transition-shadow placeholder:text-tinta-suave/70 focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-tinta/70'
+export const field = 'rounded-xl bg-papel/85 px-4 py-3.5 text-xl text-tinta ring-1 ring-tinta/15 transition-shadow placeholder:text-tinta-suave/70 focus:outline-none focus-visible:outline-none focus:ring-tinta/55 focus:shadow-[0_0_0_4px_oklch(0.24_0.06_150/0.08)]'
 export const primary = 'flex min-h-14 shrink-0 items-center justify-center gap-2 rounded-2xl bg-tinta px-6 text-lg font-bold text-papel shadow-faixa transition-transform active:scale-[0.98] disabled:bg-musgo disabled:text-tinta-suave disabled:shadow-none'
 
 function Home() {
@@ -74,7 +74,7 @@ function Home() {
   }
   // Everything that "Confirmar" will save, in display order. Typed-but-not-added text counts too.
   const chosen = [
-    ...(items ?? []).filter((it) => picked.has(it.id)).map((it) => ({ key: it.id, name: it.name, icon: it.icon ?? suggestIcon(it.name) })),
+    ...(items ?? []).filter((it) => picked.has(it.id)).map((it) => ({ key: it.id, name: it.name, note: it.note, icon: it.icon ?? suggestIcon(it.name) })),
     ...[...extras, ...(extra.trim() ? [extra.trim()] : [])].map((t, i) => ({ key: 'x' + i, name: t, icon: suggestIcon(t) })),
   ]
   const pending = chosen.length
@@ -297,7 +297,7 @@ function Home() {
       <dialog
         ref={dialogRef}
         aria-labelledby="revisao"
-        className="m-auto w-[min(32rem,calc(100%-2rem))] rounded-3xl bg-papel p-6 text-tinta shadow-ergue backdrop:bg-tinta/40 sm:p-8"
+        className="m-auto w-[min(32rem,calc(100%-2rem))] rounded-2xl bg-papel p-6 text-tinta shadow-ergue backdrop:bg-tinta/40 sm:p-8"
       >
         <h2 id="revisao" className="text-2xl font-bold">Está certo?</h2>
         <p className="mt-2 text-lg text-tinta-suave">
@@ -306,7 +306,8 @@ function Home() {
         <ul className="mt-4 space-y-2">
           {chosen.map((c) => (
             <li key={c.key} className="flex items-center gap-3 text-xl font-bold">
-              <ItemIcon icon={c.icon} className="bg-mata-alta" /> {c.name}
+              <ItemIcon icon={c.icon} className="bg-mata-alta" />
+              <span>{c.name}{c.note && <span className="block text-base font-normal text-tinta-suave">{c.note}</span>}</span>
             </li>
           ))}
         </ul>
@@ -339,7 +340,9 @@ export function Progress({ have, need }) {
   )
 }
 
+// icon '' = the organizer chose no icon.
 export function ItemIcon({ icon, className = '' }) {
+  if (icon === '') return null
   return (
     <span className={`grid size-14 shrink-0 place-items-center rounded-2xl ${className}`}>
       <img src={iconSrc(icon)} alt="" className="size-9" />
@@ -349,8 +352,13 @@ export function ItemIcon({ icon, className = '' }) {
 
 function ItemCard({ item, have, mine, closed, picked, onToggle, onCancel }) {
   const full = have >= item.slots
-  const base = 'relative flex h-full min-h-48 w-full flex-col gap-3 rounded-3xl p-5 text-left transition-[background-color,box-shadow,transform] duration-200 ease-out'
-  const title = <span className="block min-w-0 hyphens-auto text-lg font-bold leading-snug sm:text-xl">{item.name}</span>
+  const base = 'relative flex h-full min-h-48 w-full flex-col gap-3 rounded-2xl p-5 text-left transition-[background-color,box-shadow,transform] duration-200 ease-out'
+  const title = (
+    <span className="block min-w-0">
+      <span className={`block hyphens-auto text-lg font-bold leading-snug sm:text-xl ${item.icon === '' ? 'pr-9' : ''}`}>{item.name}</span>
+      {item.note && <span className="mt-1 block text-base font-normal leading-snug opacity-85">{item.note}</span>}
+    </span>
+  )
 
   if (mine)
     return (
@@ -373,7 +381,7 @@ function ItemCard({ item, have, mine, closed, picked, onToggle, onCancel }) {
 
   if (closed && !full)
     return (
-      <div className={`${base} bg-papel text-tinta ring-1 ring-linha`}>
+      <div className={`${base} vidro text-tinta ring-1 ring-linha`}>
         <ItemIcon icon={item.icon ?? suggestIcon(item.name)} className="bg-mata-alta" />
         {title}
         <span className="mt-auto"><Progress have={have} need={item.slots} /></span>
@@ -393,7 +401,7 @@ function ItemCard({ item, have, mine, closed, picked, onToggle, onCancel }) {
     <button
       onClick={onToggle}
       aria-pressed={picked}
-      className={`${base} bg-papel text-tinta shadow-faixa active:scale-[0.98] ${picked ? 'ring-[3px] ring-tinta' : 'ring-1 ring-linha hover:shadow-ergue'}`}
+      className={`${base} vidro text-tinta shadow-faixa active:scale-[0.98] ${picked ? 'ring-[3px] ring-tinta' : 'ring-1 ring-linha hover:bg-papel/80'}`}
     >
       <span
         aria-hidden

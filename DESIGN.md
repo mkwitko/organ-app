@@ -199,3 +199,11 @@ Mata-alta 1rem panels with 1.25rem padding for forms and event lists; alerta for
 - Member page: a leaf strip under the name field lists "Você vai levar: …" for the current person. Cancelling a confirmed choice asks first.
 - Admin on phones: the session select and "Nova sessão" stack full width; summary actions form a 2-column grid (WhatsApp and Encerrar span both columns). Item cards put the icon and the edit/remove buttons on one row and the name full width below. Remove buttons on name chips are 36px.
 - Admin login: heading "Organização" with "App da Organ" below it, no eyebrow label.
+
+## Revision 2026-11-09 (g) — user request
+
+- **Glass cards:** cards and panels use `vidro` (white at 62%, 16px blur, saturate 1.4) with `shadow-faixa` and the `linha` ring. The page ground carries three soft radial glows (leaf, sun, leaf) fixed behind the content so the glass has something to frost. Print drops the glows.
+- **Radius:** cards and panels 1rem (`rounded-2xl`), down from 1.5rem. Inputs stay 0.75rem.
+- **Inputs:** 1px ring at 15% ink, 1px at 55% on focus plus a 4px halo at 8% ink. The global 3px focus outline lives in `@layer base` and skips text fields.
+- **Icons:** 13 more fruits (Fluent Emoji Flat). The icon is optional (`icon: ''` hides the tile). The picker has a search field that matches labels and name keywords without accents, plus a "Sem ícone" choice.
+- **Item instructions:** optional `note` (up to 120 chars) shows under the item name on both pages, in the review dialog and in the WhatsApp list as `— _note_`.

@@ -43,7 +43,7 @@ Entre em **`/admin`** com seu email e senha. Quem cuida do app cria esse acesso 
 
 1. Toque em **Nova sessão**. Escreva o nome (por exemplo "Sessão de Escala") e a data.
 2. Para não digitar tudo de novo, escolha em **Copiar os itens de** uma sessão anterior.
-3. Para adicionar itens, escreva o nome (por exemplo "Bolo") e quantas pessoas devem levar, e toque em **Adicionar**. O ícone é escolhido pelo nome. Para trocar, toque no ícone.
+3. Para adicionar itens, escreva o nome (por exemplo "Melancia") e quantas pessoas devem levar. Se quiser, escreva uma instrução (por exemplo "Trazer fatiada"). Toque em **Adicionar**. O ícone é escolhido pelo nome. Para trocar, toque no ícone e busque pelo nome ("manga", "café"…). Para ficar sem ícone, escolha **Sem ícone**.
 4. Toque em **Copiar link** e mande o link no grupo.
 
 A página dos sócios sempre mostra a **próxima** sessão, ou seja, a de data mais próxima, a partir de hoje.
@@ -176,7 +176,7 @@ O App Check bloqueia programas que tentam usar o banco fora do site.
 ```
 admins/{email ou uid}                     vazio; existir = ser admin
 events/{id}                               name, date (YYYY-MM-DD), closed?, createdAt
-events/{id}/items/{itemId}                name, slots, icon, createdAt
+events/{id}/items/{itemId}                name, slots, icon ('' = sem ícone), note?, createdAt
 events/{id}/taken/{itemId}_{slot}         itemId, uid, slot           ← público, sem nome
 events/{id}/signups/{itemId}_{slot}       itemId, itemName, slot, person, uid, createdAt   ← privado
 events/{id}/signups/{auto}                itemId = null, itemName, person, uid  ← "outra coisa"

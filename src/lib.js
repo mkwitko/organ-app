@@ -15,7 +15,7 @@ export function listText(ev, items, signups) {
   for (const it of items) {
     const { taken, left } = itemStatus(it, signups)
     const names = taken.map((s) => s.person).join(', ')
-    lines.push(`• ${it.name} (${taken.length} de ${it.slots})${names ? ': ' + names : ''}${left ? ' ⚠️' : ' ✅'}`)
+    lines.push(`• ${it.name}${it.note ? ` — _${it.note}_` : ''} (${taken.length} de ${it.slots})${names ? ': ' + names : ''}${left ? ' ⚠️' : ' ✅'}`)
   }
   const extra = signups.filter((s) => !s.itemId)
   if (extra.length) {
@@ -28,10 +28,10 @@ export function listText(ev, items, signups) {
 // Icon keys the admin can pick; the first keyword found in the item name suggests one.
 // Order matters: more specific words first ("salada de fruta" is fruit, "pão de queijo" is bread).
 export const ICON_KEYWORDS = [
-  ['frutas', ['fruta', 'maca', 'mamao', 'abacaxi', 'morango']],
+  ['frutas', ['fruta', 'mamao']],
   ['uva', ['uva']],
   ['banana', ['banana']],
-  ['melancia', ['melancia', 'melao']],
+  ['melancia', ['melancia']],
   ['paodequeijo', ['pao de queijo', 'queijo']],
   ['pao', ['pao', 'croissant', 'rosca', 'broa']],
   ['sanduiche', ['sanduiche', 'misto', 'lanche natural', 'bauru']],
@@ -57,6 +57,19 @@ export const ICON_KEYWORDS = [
   ['refrigerante', ['refri', 'guarana', 'soda', 'coca']],
   ['suco', ['suco', 'limonada']],
   ['laranja', ['laranja', 'tangerina', 'mexerica', 'bergamota']],
+  ['maca', ['maca ', 'macas']],
+  ['pera', ['pera ', 'peras']],
+  ['limao', ['limao', 'limoes', 'lima ']],
+  ['abacaxi', ['abacaxi']],
+  ['manga', ['manga']],
+  ['morango', ['morango']],
+  ['cereja', ['cereja']],
+  ['pessego', ['pessego']],
+  ['kiwi', ['kiwi']],
+  ['coco', ['coco ', 'cocos', 'agua de coco']],
+  ['melao', ['melao', 'meloes']],
+  ['mirtilo', ['mirtilo', 'blueberr', 'amora', 'jabuticaba']],
+  ['abacate', ['abacate', 'guacamole']],
   ['agua', ['agua']],
   ['cafe', ['cafe', 'cappuccino']],
   ['cha', ['cha ', 'mate', 'chimarrao']],
@@ -66,8 +79,11 @@ export const ICON_KEYWORDS = [
   ['guardanapo', ['guardanapo', 'papel']],
 ]
 
+// Lowercase without accents, for matching typed text.
+export const plain = (t) => t.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+
 export function suggestIcon(name) {
-  const n = ' ' + name.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase() + ' '
+  const n = ' ' + plain(name) + ' '
   for (const [key, words] of ICON_KEYWORDS) if (words.some((w) => n.includes(' ' + w))) return key
   return null
 }

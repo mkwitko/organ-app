@@ -28,6 +28,28 @@ html {
   scrollbar-color: var(--color-musgo) var(--color-mata);
 }
 
+/* Soft leaf and sun glows behind the content, so glass cards have something to frost. */
+body {
+  background:
+    radial-gradient(40rem 30rem at 0% 0%, oklch(0.9 0.07 140 / 0.55), transparent 70%),
+    radial-gradient(36rem 28rem at 100% 35%, oklch(0.93 0.09 95 / 0.4), transparent 70%),
+    radial-gradient(44rem 32rem at 20% 100%, oklch(0.9 0.06 160 / 0.45), transparent 70%),
+    var(--color-mata);
+  background-attachment: fixed;
+  min-height: 100dvh;
+}
+
+/* Frosted card: translucent white and blur. Pair with shadow-faixa and a ring (both box-shadow). */
+@utility vidro {
+  background: oklch(1 0 0 / 0.62);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+}
+
+@media print {
+  body { background: none; }
+}
+
 ::selection {
   background: var(--color-sol);
   color: var(--color-tinta);
@@ -37,9 +59,15 @@ input {
   caret-color: var(--color-tinta);
 }
 
-:focus-visible {
-  outline: 3px solid var(--color-tinta);
-  outline-offset: 3px;
+/* In the base layer so utilities win: text fields draw their own thin ring and halo instead. */
+@layer base {
+  :focus-visible {
+    outline: 3px solid var(--color-tinta);
+    outline-offset: 3px;
+  }
+  :is(input, select, textarea):focus-visible {
+    outline: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
