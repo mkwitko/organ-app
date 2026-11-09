@@ -1,5 +1,5 @@
 import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, updateDoc, writeBatch } from 'firebase/firestore'
-import { ChevronDown, Copy, Link2, Lock, LockOpen, LogOut, Pencil, Plus, Printer, Trash2, UserPlus, X } from 'lucide-react'
+import { ChevronDown, Copy, Eye, EyeOff, Link2, Lock, LockOpen, LogOut, Pencil, Plus, Printer, Trash2, UserPlus, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { ItemIcon, Progress, Shell, field, primary } from './App.jsx'
 import { ICONS, iconSrc } from './icons.js'
@@ -39,43 +39,78 @@ export default function Admin() {
 }
 
 // Admin accounts live in Firebase Authentication; access also needs a doc /admins/{email} (both set in the console).
+const loginError = (code) =>
+  code === 'auth/too-many-requests' ? 'Muitas tentativas. Espere alguns minutos e tente de novo.'
+  : code === 'auth/network-request-failed' ? 'Sem internet. Confira a conexão e tente de novo.'
+  : 'Email ou senha incorretos.'
+
 function Login({ email }) {
-  const [form, setForm] = useState({ email: '', password: '' })
-  const [msg, setMsg] = useState(email ? `${email} não tem acesso à organização.` : '')
+  const [form, setForm] = useState({ email: email ?? '', password: '' })
+  const [msg, setMsg] = useState({ text: '', ok: false })
+  const [show, setShow] = useState(false)
+  const [busy, setBusy] = useState(false)
 
   async function login(e) {
     e.preventDefault()
-    setMsg('')
+    setMsg({ text: '', ok: false })
+    setBusy(true)
     try {
       await signInWithEmailAndPassword(auth, form.email.trim(), form.password)
-    } catch {
-      setMsg('Email ou senha incorretos.')
+    } catch (err) {
+      setMsg({ text: loginError(err.code), ok: false })
     }
+    setBusy(false)
   }
 
   async function reset() {
-    if (!form.email.trim()) return setMsg('Escreva seu email para receber o link.')
+    if (!form.email.trim()) return setMsg({ text: 'Escreva seu email acima para receber o link.', ok: false })
     await sendPasswordResetEmail(auth, form.email.trim()).catch(() => {})
-    setMsg('Se esse email tiver conta, chegará um link para criar nova senha.')
+    setMsg({ text: 'Se esse email tiver conta, chegará um link para criar nova senha.', ok: true })
   }
 
   return (
-    <form onSubmit={login} className="max-w-md">
-      <h1 className="text-3xl font-bold text-tinta">Organização</h1>
-      <label className="mt-6 block text-lg">
-        Email
-        <input type="email" autoComplete="username" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={`${field} mt-2 block w-full`} autoFocus />
-      </label>
-      <label className="mt-4 block text-lg">
-        Senha
-        <input type="password" autoComplete="current-password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className={`${field} mt-2 block w-full`} />
-      </label>
-      <p aria-live="polite" className="mt-2 min-h-7 font-bold text-alerta">{msg}</p>
-      <div className="mt-2 flex flex-wrap items-center gap-4">
-        <button className={primary}>Entrar</button>
-        <button type="button" onClick={reset} className="text-lg underline underline-offset-4">Esqueci a senha</button>
+    <div className="mx-auto max-w-md pt-4 sm:pt-10">
+      <div className="flex items-center gap-3">
+        <img src="/icon-192.png" alt="" className="size-14 rounded-2xl shadow-faixa" />
+        <div>
+          <p className="text-base font-bold uppercase tracking-wider text-tinta-suave">App da Organ</p>
+          <h1 className="text-3xl font-bold text-tinta">Organização</h1>
+        </div>
       </div>
-    </form>
+
+      {email ? (
+        <div className="mt-8 rounded-3xl bg-papel p-6 shadow-faixa ring-1 ring-linha">
+          <p className="flex items-center gap-2 text-xl font-bold text-tinta"><Lock aria-hidden size={22} /> Sem acesso</p>
+          <p className="mt-3 text-lg">
+            Você entrou como <b className="break-all text-tinta">{email}</b>, mas esse email não está na lista da organização.
+          </p>
+          <p className="mt-2 text-lg">Peça a quem cuida do app para incluir você.</p>
+          <button onClick={() => signOut(auth)} className={`${ghost} mt-6 w-full`}><LogOut aria-hidden size={20} /> Entrar com outro email</button>
+        </div>
+      ) : (
+        <form onSubmit={login} className="mt-8 rounded-3xl bg-papel p-6 shadow-faixa ring-1 ring-linha">
+          <p className="text-lg">Entre para montar a lista de cada sessão e ver quem leva o quê.</p>
+          <label className="mt-6 block text-lg font-bold text-tinta">
+            Email
+            <input type="email" autoComplete="username" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={`${field} mt-2 block w-full font-normal`} autoFocus />
+          </label>
+          <label className="mt-4 block text-lg font-bold text-tinta">
+            Senha
+            <span className="relative mt-2 block">
+              <input type={show ? 'text' : 'password'} autoComplete="current-password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className={`${field} block w-full pr-14 font-normal`} />
+              <button type="button" onClick={() => setShow(!show)} aria-label={show ? 'Esconder senha' : 'Mostrar senha'} aria-pressed={show} className="absolute inset-y-0 right-0 flex w-14 items-center justify-center text-tinta-suave hover:text-tinta">
+                {show ? <EyeOff aria-hidden size={22} /> : <Eye aria-hidden size={22} />}
+              </button>
+            </span>
+          </label>
+          <p aria-live="polite" className={`mt-3 min-h-7 text-lg font-bold ${msg.ok ? 'text-tinta' : 'text-alerta'}`}>{msg.text}</p>
+          <button disabled={busy} className={`${primary} mt-2 w-full`}>{busy ? 'Entrando…' : 'Entrar'}</button>
+          <button type="button" onClick={reset} className="mt-4 min-h-11 w-full text-lg text-tinta underline underline-offset-4">Esqueci a senha</button>
+        </form>
+      )}
+
+      <a href="/" className="mt-6 block text-center text-lg text-tinta-suave underline underline-offset-4">Voltar para a lista do lanche</a>
+    </div>
   )
 }
 
